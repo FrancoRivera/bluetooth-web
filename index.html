@@ -3,10 +3,15 @@
   <head>
     <meta charset="UTF-8">
     <title>Bluetooth Concept POC</title>
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="chota.min.css"/>
   </head>
   <body>
+    <div class="container">
+    <div class="row">
+      <div class="col">
     <h1>Bluetooth Connectivity POC</h1>
+      </div>
+    </div>
 
     <form>
     <div class="row">
@@ -21,12 +26,13 @@
       </div>
     </div>
     </form>
-    <canvas id="myCanvas" width="1500" height="1000"> </canvas>
+    <canvas id="myCanvas" width="800" height="500"> </canvas>
 
     <div id="output" class="output">
       <div id="content"></div>
       <div id="status"></div>
       <pre id="log"></pre>
+    </div>
     </div>
     <script charset="utf-8" src="bluetooth.js"> </script>
     <script charset="utf-8">
@@ -38,8 +44,8 @@
 
 	function drawFromJson(json){
 	ctx.fillStyle ="red"
-	var width = window.innerWidth;
-	var height = window.innerHeight;
+	var width = canvas.width;
+	var height = canvas.height;
 	  ctx.fillRect(json["x"]*width + width/2, json["y"]*height+height/2, 3, 3)
 	  console.log(json["x"]*width + width/2)
 
