@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title></title>
+  </head>
+  <body>
+
+    <form>
+      <input id="optionalServices" type="text" list="services" size="40" placeholder="Bluetooth Services (e.g. generic_access, 0x1234)" value="0x2A3D">
+      <button>Discover services &amp; characteristics</button>
+    </form>
+    <button type="button" onclick="clearCanvas()">Clear Canvas</button>
+    <canvas id="myCanvas" width="1500" height="1000"> </canvas>
+
+    <div id="output" class="output">
+      <div id="content"></div>
+      <div id="status"></div>
+      <pre id="log"></pre>
+    </div>
+    <script charset="utf-8">
+
+      var canvas = document.getElementById("myCanvas");
+      var ctx = canvas.getContext("2d");
+
+      clearCanvas();
+
+      if (/Chrome\/(\d+\.\d+.\d+.\d+)/.test(navigator.userAgent)){
+    // Let's log a warning if the sample is not supposed to execute on this
+    // version of Chrome.
+    if (53 > parseInt(RegExp.$1)) {
+      ChromeSamples.setStatus('Warning! Keep in mind this sample has been tested with Chrome ' + 53 + '.');
+    }
+  }
+
+
+  document.querySelector('form').addEventListener('submit', function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (isWebBluetoothEnabled()) {
+      ChromeSamples.clearLog();
+      onButtonClick();
+    }
+  });
+
+
+
+  var ChromeSamples = {
+    log: function() {
+      var line = Array.prototype.slice.call(arguments).map(function(argument) {
+	return typeof argument === 'string' ? argument : JSON.stringify(argument);
+      }).join(' ');
+
+      document.querySelector('#log').textContent += line + '\n';
+    },
+
+    clearLog: function() {
+      document.querySelector('#log').textContent = '';
+    },
+
+    setStatus: function(status) {
+      document.querySelector('#status').textContent = status;
+    },
+
+    setContent: function(newContent) {
+      var content = document.querySelector('#content');
+      while(content.hasChildNodes()) {
+	content.removeChild(content.lastChild);
+      }
+      content.appendChild(newContent);
+    }
+  };
+
+
+
+  log = ChromeSamples.log;
+
+  function isWebBluetoothEnabled() {
+    if (navigator.bluetooth) {
+      return true;
+    } else {
+      ChromeSamples.setStatus('Web Bluetooth API is not available.\n' +
+	  'Please make sure the "Experimental Web Platform features" flag is enabled.');
+      return false;
+    }
+  }
+
+
+
+
+
+
+
+var myCharacteristic;
+
+    function onButtonClick() {
+  // Validate services UUID entered by user first.
+  let optionalServices = document.querySelector('#optionalServices').value
+    .split(/, ?/).map(s => s.startsWith('0x') ? parseInt(s) : s)
+    .filter(s => s && BluetoothUUID.getService);
+
+  log('Requesting any Bluetooth Device...');
+  navigator.bluetooth.requestDevice({
+   // filters: [...] <- Prefer filters to save energy & show relevant devices.
+      filters: [{services: [parseInt("0x2A3D")]}],
+      //acceptAllDevices: true,
+      optionalServices: optionalServices})
+  .then(device => {
+    log('Connecting to GATT Server...');
+    return device.gatt.connect();
+  })
+  .then(server => {
+    // Note that we could also get all services that match a specific UUID by
+    // passing it to getPrimaryServices().
+    log('Getting Services...');
+    return server.getPrimaryServices();
+  })
+  .then(services => {
+    log('Getting Characteristics...');
+    let queue = Promise.resolve();
+    services.forEach(service => {
+      queue = queue.then(_ => service.getCharacteristics(parseInt("0x2A3D")).then(characteristics => {
+	log('> Service: ' + service.uuid);
+	characteristics.forEach(characteristic => {
+	//if (characteristic.uuid != parseInt("0x2A3D")){ log("NAH", characteristic.uuid); return}
+	myCharacteristic = characteristic
+	  log('>> Characteristic: ' + characteristic.uuid + ' ' +
+	      getSupportedProperties(characteristic));
+	});
+	  return myCharacteristic.startNotifications().then(_ => {
+	    log('> Notifications started');
+	    myCharacteristic.addEventListener('characteristicvaluechanged',
+		handleNotifications);
+	  });
+      }));
+    });
+    return queue;
+  })
+  .catch(error => {
+    log('Argh! ' + error);
+  });
+}
+
+/* Utils */
+
+function getSupportedProperties(characteristic) {
+  let supportedProperties = [];
+  for (const p in characteristic.properties) {
+    if (characteristic.properties[p] === true) {
+      supportedProperties.push(p.toUpperCase());
+    }
+  }
+  return '[' + supportedProperties.join(', ') + ']';
+}
+
+    function hex_to_ascii(str1)
+     {
+	    var hex  = str1.toString();
+	    var str = '';
+	    for (var n = 0; n < hex.length; n += 2) {
+		    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+	    }
+	    return str;
+     }
+
+    function handleNotifications(event) {
+      let value = event.target.value;
+      let a = [];
+      // Convert raw data bytes to hex values just for the sake of showing something.
+      // In the "real" world, you'd use data.getUint8, data.getUint16 or even
+      // TextDecoder to process raw data bytes.
+      for (let i = 0; i < value.byteLength; i++) {
+	a.push((value.getInt8(i).toString(16)).slice(-2));
+      }
+
+      var json = JSON.parse(hex_to_ascii(a.join('')));
+      drawFromJson(json);
+      //log('> ' + String.fromCharCode.apply(String, value));
+
+    }
+
+    function drawFromJson(json){
+    ctx.fillStyle ="red"
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+      ctx.fillRect(json["x"]*width + width/2, json["y"]*height+height/2, 3, 3)
+      console.log(json["x"]*width + width/2)
+
+    }
+    function clearCanvas(){
+    ctx.fillStyle ="black"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+    </script>
+  </body>
+</html>
