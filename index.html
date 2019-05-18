@@ -169,7 +169,7 @@ body{
 	if(json["acc_x"] > 4 || json["acc_y"] > 4 || json["acc_z"] > 4){
 	  golpes++;
 	  document.getElementById("golpes").innerHTML = golpes;
-	  document.getElementById("ult_golpe").innerHTML = "x: "+  json["acc_x"] + "y: "+ json["acc_y"] + "z: "+  json["acc_z"];
+	  document.getElementById("ult_golpe").innerHTML = "x: "+  json["acc_x"] + "<br />y: "+ json["acc_y"] + "<br />z: "+  json["acc_z"];
 	}
 
 	//console.log(delta);
