@@ -138,6 +138,12 @@ function getSupportedProperties(characteristic) {
      }
 
     function handleNotifications(event) {
+      if(arreglo_mediciones.length == 0){
+      window.setTimeout(function(){
+      document.getElementById("current_refresh").innerHTML = "<b>Current tx rate: </b>" + arreglo_mediciones.length +  "Hz";
+	arreglo_mediciones = [];
+      }, 1000)
+      }
       let value = event.target.value;
       let a = [];
       // Convert raw data bytes to hex values just for the sake of showing something.
@@ -148,7 +154,11 @@ function getSupportedProperties(characteristic) {
       }
 
       var json = JSON.parse(hex_to_ascii(a.join('')));
+
+      arreglo_mediciones.push(json);
+
+      document.getElementById("current_pos").innerHTML = "<b>x:</b> " + json["x"] + "</br> <b>y:</b> " +json["y"] + "<br /><b>z:</b> " + json["z"];
       drawFromJson(json);
-      //log('> ' + String.fromCharCode.apply(String, value));
+      drawAccFromJson(json);
 
     }
