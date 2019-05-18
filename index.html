@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="chota.min.css"/>
 <style>
 canvas{
-border-radius:10px;
+border-radius:5px;
 margin: 20px 0;
 }
 </style>
@@ -34,22 +34,24 @@ margin: 20px 0;
       </form>
       <div class="row">
 	<div class="col-6">
-      		<canvas id="gyroscopeCanvas" width="550" height="400"> </canvas>
+      		<canvas id="gyroscopeCanvas" width="550" height="300"> </canvas>
 	</div>
 	<div class="col-6">
-      <canvas id="accelerometerCanvas" width="550" height="400"> </canvas>
+      <canvas id="accelerometerCanvas" width="550" height="300"> </canvas>
 	</div>
       </div>
       <div class="row">
-	<div class="col">
-	  <canvas id="graphChart" width="300" height="100"> </canvas>
-	</div>
-      </div>
+	<div class="col-6">
       <h1>Golpes:</h1>
       <div id="golpes">0</div>
       <div id="ult_golpe">0</div>
       <div id="current_pos"></div>
       <div id="current_refresh"></div>
+	</div>
+	<div class="col-6">
+	  <canvas id="graphChart" width="200" height="100"> </canvas>
+	</div>
+      </div>
 
       <div id="output" class="output">
 	<div id="content"></div>
@@ -93,7 +95,7 @@ margin: 20px 0;
 	var pos = two_d_to_3d(json["x"], json["y"], json["z"]);
 	if(last_pos_g){
 	  ctx_gyro.strokeStyle = "#00c577";
-	  ctx_gyro.lineWidth = "4";
+	  ctx_gyro.lineWidth = "1";
 	  ctx_gyro.beginPath();
 	  ctx_gyro.moveTo(last_pos_g.x, last_pos_g.y);
 	  ctx_gyro.lineTo(pos.x, pos.y);
@@ -120,7 +122,7 @@ margin: 20px 0;
       }
 	if(last_pos_a){
 	  ctx_acc.strokeStyle = "#00c577";
-	  ctx_acc.lineWidth = "3";
+	  ctx_acc.lineWidth = "1";
 	  ctx_acc.beginPath();
 	  ctx_acc.moveTo(last_pos_a.x, last_pos_a.y);
 	  ctx_acc.lineTo(pos.x, pos.y);
