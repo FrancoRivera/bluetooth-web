@@ -4,18 +4,51 @@
     <meta charset="UTF-8">
     <title>Bluetooth Concept POC</title>
     <link rel="stylesheet" href="chota.min.css"/>
-<style>
-canvas{
-border-radius:5px;
-margin: 20px 0;
+    <link href="https://fonts.googleapis.com/css?family=Raleway:600,700,900&display=swap" rel="stylesheet">
+    <style>
+a{
+  border-bottom: 2px solid #1d85ff;
 }
-</style>
+body{
+  border-top: 30px solid #1d85ff;
+  padding-top: 20px;
+  color: #222;
+}
+  h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: 35px;
+    font-weight: 700;
+  }
+  canvas{
+    border-radius:5px;
+    margin: 20px 0;
+    border-bottom: 10px solid #1d85ff;
+  }
+  .logos img{
+    margin:20px 50px;
+    max-height: 50px;
+  }
+  .footer{
+    background: #1d85ff;
+    padding: 10px;
+    color: white;
+  }
+  .footer a{
+    color: white;
+    border-bottom-color: white;
+  }
+    </style>
   </head>
   <body>
     <div class="container">
       <div class="row">
-	<div class="col">
+	<div class="col-6">
 	  <h1>Bluetooth Connectivity POC</h1>
+	</div>
+	<div class="col-6 logos">
+	  <img src="img/upc-logo.png" alt="" />
+	  <img src="img/bluetooth.png" alt="" />
+	  <img src="img/ufc-logo.jpg" alt="" />
 	</div>
       </div>
 
@@ -34,19 +67,19 @@ margin: 20px 0;
       </form>
       <div class="row">
 	<div class="col-6">
-      		<canvas id="gyroscopeCanvas" width="550" height="300"> </canvas>
+	  <canvas id="gyroscopeCanvas" width="550" height="300"> </canvas>
 	</div>
 	<div class="col-6">
-      <canvas id="accelerometerCanvas" width="550" height="300"> </canvas>
+	  <canvas id="accelerometerCanvas" width="550" height="300"> </canvas>
 	</div>
       </div>
       <div class="row">
 	<div class="col-6">
-      <h1>Golpes:</h1>
-      <div id="golpes">0</div>
-      <div id="ult_golpe">0</div>
-      <div id="current_pos"></div>
-      <div id="current_refresh"></div>
+	  <h1>Golpes:</h1>
+	  <div id="golpes" class="button"></div>
+	  <div id="ult_golpe" class="button"></div>
+	  <div id="current_pos"></div>
+	  <div id="current_refresh" class="button primary"></div>
 	</div>
 	<div class="col-6">
 	  <canvas id="graphChart" width="200" height="100"> </canvas>
@@ -59,6 +92,7 @@ margin: 20px 0;
 	<pre id="log"></pre>
       </div>
     </div>
+    <div class="footer is-text-center">More info of this project on the <a href="https://github.com/FrancoRivera/Bluetooth-web">Github Repo.</a></div>
     <script charset="utf-8" src="bluetooth.js"> </script>
     <script charset="utf-8">
 
