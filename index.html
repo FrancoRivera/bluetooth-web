@@ -5,6 +5,7 @@
     <title>Bluetooth Concept POC</title>
     <link rel="stylesheet" href="chota.min.css"/>
     <link href="https://fonts.googleapis.com/css?family=Raleway:600,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
     <style>
 a{
   border-bottom: 2px solid #1d85ff;
@@ -51,7 +52,6 @@ body{
 	  <img src="img/ufc-logo.jpg" alt="" />
 	</div>
       </div>
-
       <form>
 	<div class="row">
 	  <div class="col">
@@ -67,7 +67,7 @@ body{
       </form>
       <div class="row">
 	<div class="col-6">
-	  <canvas id="gyroscopeCanvas" width="550" height="300"> </canvas>
+	  <canvas id="canvas" width="550" height="300"> </canvas>
 	</div>
 	<div class="col-6">
 	  <canvas id="accelerometerCanvas" width="550" height="300"> </canvas>
@@ -94,10 +94,53 @@ body{
     </div>
     <div class="footer is-text-center">More info of this project on the <a href="https://github.com/FrancoRivera/Bluetooth-web">Github Repo.</a></div>
     <script charset="utf-8" src="bluetooth.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/104/three.min.js"></script>
+    <script>
+      'use strict';
+
+      /* global THREE */
+
+	const canvas = document.querySelector('#canvas');
+	const renderer = new THREE.WebGLRenderer({canvas});
+
+	const fov = 75;
+	const aspect = 2;  // the canvas default
+	const near = 0.1;
+	const far = 5;
+	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+	camera.position.z = 3;
+
+	const scene = new THREE.Scene();
+
+	{
+	  const color = 0xFFFFFF;
+	  const intensity = 1;
+	  const light = new THREE.DirectionalLight(color, intensity);
+	  light.position.set(-1, 2, 4);
+	  scene.add(light);
+	}
+
+	const boxWidth = 1.125;
+	const boxHeight = 2.436;
+	const boxDepth = 0.1;
+	const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+	const material = new THREE.MeshPhongMaterial({color: 0x44aa88});  // greenish blue
+
+	const cube = new THREE.Mesh(geometry, material);
+	scene.add(cube);
+
+	function render(time) {
+
+	  requestAnimationFrame(render);
+	}
+	requestAnimationFrame(render);
+
+
+
+    </script>
     <script charset="utf-8">
 
-      var canvas_gyro = document.getElementById("gyroscopeCanvas");
-      var ctx_gyro = canvas_gyro.getContext("2d");
 
       var canvas_acc = document.getElementById("accelerometerCanvas");
       var ctx_acc = canvas_acc.getContext("2d");
@@ -111,49 +154,40 @@ body{
       var golpes = 0;
       var delta = 0;
 
-      //origin
-      var width = canvas_gyro.width;
-      var height = canvas_gyro.height;
+      var width = canvas_acc.width;
+      var height = canvas_acc.height;
 
-      ctx_gyro.fillStyle = "red";
+      //origin
 
       clearCanvas();
+
       function two_d_to_3d(x, y, z){
       //this "normalizes" the data
 	var padding = 0.2;
-	return {x: (y * width/2 + width / 2 - (width * x)) * padding + 200,
-		y: (z * height/2 + height / 2 + (height * x)) * padding + 200}
+	return {x: ((y+1)* width/2 - (width * x)) * padding + 200,
+		y: ((z+1) * height/2 + (height * x)) * padding + 200}
       }
 
-      function drawFromJson(json){
-	var pos = two_d_to_3d(json["x"], json["y"], json["z"]);
-	if(last_pos_g){
-	  ctx_gyro.strokeStyle = "#00c577";
-	  ctx_gyro.lineWidth = "1";
-	  ctx_gyro.beginPath();
-	  ctx_gyro.moveTo(last_pos_g.x, last_pos_g.y);
-	  ctx_gyro.lineTo(pos.x, pos.y);
-	  ctx_gyro.stroke();
-	}
-
-	last_pos_g = pos;
-	ctx_gyro.fillStyle = "red";
-	ctx_gyro.fillRect(pos.x, pos.y, 3, 3);
-	}
-
-
       function drawAccFromJson(json){
+	//update iphone position
+
+	cube.rotation.x = -((json["y"]) * (3.1415/2))
+	cube.rotation.y = ((json["x"]) * (3.1415/2));
+
 	var pos = two_d_to_3d(json["acc_x"], json["acc_y"], json["acc_z"]);
+
 	addToAccChart(0, json["acc_x"])
 	addToAccChart(1, json["acc_y"])
 	addToAccChart(2, json["acc_z"])
-      accChart.data.labels.push("a");
-      if(accChart.data.labels.length > 150){
-	accChart.data.labels.shift();
-	accChart.data.datasets[0].data.shift();
-	accChart.data.datasets[1].data.shift();
-	accChart.data.datasets[2].data.shift();
-      }
+	accChart.data.labels.push("a");
+
+	if(accChart.data.labels.length > 150){
+	  accChart.data.labels.shift();
+	  accChart.data.datasets[0].data.shift();
+	  accChart.data.datasets[1].data.shift();
+	  accChart.data.datasets[2].data.shift();
+	}
+	// darw lines connecting dots
 	if(last_pos_a){
 	  ctx_acc.strokeStyle = "#00c577";
 	  ctx_acc.lineWidth = "1";
@@ -161,11 +195,11 @@ body{
 	  ctx_acc.moveTo(last_pos_a.x, last_pos_a.y);
 	  ctx_acc.lineTo(pos.x, pos.y);
 	  ctx_acc.stroke();
-	delta = Math.sqrt(Math.pow(last_pos_a.x-pos.x, 2) + Math.pow(last_pos_a.y-pos.y, 2))
+	  delta = Math.sqrt(Math.pow(last_pos_a.x-pos.x, 2) + Math.pow(last_pos_a.y-pos.y, 2))
 	}
 	last_pos_a = pos;
-	ctx_acc.fillStyle = "red";
-	ctx_acc.fillRect(pos.x, pos.y, 3, 3);
+	  ctx_acc.fillStyle = "red";
+	ctx_acc.fillRect(pos.x, pos.y, 2, 2);
 	if(json["acc_x"] > 4 || json["acc_y"] > 4 || json["acc_z"] > 4){
 	  golpes++;
 	  document.getElementById("golpes").innerHTML = golpes;
@@ -178,52 +212,30 @@ body{
 	function clearCanvas(){
 
 	  ctx_acc.strokeStyle = "#1d85ff";
-	  ctx_gyro.strokeStyle = "#1d85ff";
 	  ctx_acc.fillStyle ="#222"
-	  ctx_gyro.fillStyle ="#222"
 	  ctx_acc.fillRect(0, 0, width, height)
-	  ctx_gyro.fillRect(0, 0, width, height)
-	  ctx_gyro.fillStyle = "red";
-	  ctx_acc.fillStyle = "red";
 
-	  ctx_gyro.lineWidth = "2";
 	  ctx_acc.lineWidth = "2";
-	  ctx_gyro.beginPath();
 
-	//move to origin
-	ctx_gyro.moveTo(width/2, height/2);
-	//vertical line
-	ctx_gyro.lineTo(width/2, 0);
-	// y axis
-	ctx_gyro.moveTo(width/2, height/2);
-	ctx_gyro.lineTo(width, height/2);
+	  ctx_acc.beginPath();
 
-	// z axis
-	ctx_gyro.moveTo(width/2, height/2);
-	ctx_gyro.lineTo(0, height);
+	  //move to origin
+	  ctx_acc.moveTo(width/2, height/2);
+	  //vertical line
+	  ctx_acc.lineTo(width/2, 0);
+	  // y axis
+	  ctx_acc.moveTo(width/2, height/2);
+	  ctx_acc.lineTo(width, height/2);
 
-	ctx_gyro.stroke();
+	  // z axis
+	  ctx_acc.moveTo(width/2, height/2);
+	  ctx_acc.lineTo(0, height);
 
-	ctx_acc.beginPath();
-
-	//move to origin
-	ctx_acc.moveTo(width/2, height/2);
-	//vertical line
-	ctx_acc.lineTo(width/2, 0);
-	// y axis
-	ctx_acc.moveTo(width/2, height/2);
-	ctx_acc.lineTo(width, height/2);
-
-	// z axis
-	ctx_acc.moveTo(width/2, height/2);
-	ctx_acc.lineTo(0, height);
-
-	ctx_acc.stroke();
+	  ctx_acc.stroke();
 	}
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
     <script>
       var ctx_chart = document.getElementById('graphChart').getContext('2d');
 var accChart = new Chart(ctx_chart, {
@@ -268,6 +280,7 @@ function addToAccChart(index, value){
 }
 window.setInterval(function(){
   accChart.update();
+  renderer.render(scene, camera);
 }, 1000/60)
     </script>
   </body>

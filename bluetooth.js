@@ -156,9 +156,6 @@ function getSupportedProperties(characteristic) {
       var json = JSON.parse(hex_to_ascii(a.join('')));
 
       arreglo_mediciones.push(json);
-
-      document.getElementById("current_pos").innerHTML = "<b>x:</b> " + json["x"] + "</br> <b>y:</b> " +json["y"] + "<br /><b>z:</b> " + json["z"];
-      drawFromJson(json);
       drawAccFromJson(json);
 
     }
