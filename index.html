@@ -80,6 +80,7 @@ body{
 	  <div id="ult_golpe" class="button"></div>
 	  <div id="current_pos"></div>
 	  <div id="current_refresh" class="button primary"></div>
+	  <div id="ult_velocidad" class="button primary"></div>
 	</div>
 	<div class="col-6">
 	  <canvas id="graphChart" width="200" height="100"> </canvas>
@@ -149,7 +150,7 @@ body{
 
       var time = 0;
 
-      var last_pos_g;
+      var last_pos_json;
       var last_pos_a;
       var golpes = 0;
       var delta = 0;
@@ -167,6 +168,20 @@ body{
 	return {x: ((y+1)* width/2 - (width * x)) * padding + 200,
 		y: ((z+1) * height/2 + (height * x)) * padding + 200}
       }
+	function findVelocity(pointA, pointB){
+		var h = 1000/60;
+		var a_x = pointA["acc_x"]
+		var b_x = pointB["acc_x"]
+		var a_y = pointA["acc_y"]
+		var b_y = pointB["acc_y"]
+		var a_z = pointA["acc_z"]
+		var b_z = pointB["acc_z"]
+		var vel_x = h * (a_x + b_x)/2;
+		var vel_y = h * (a_y + b_y)/2;
+		var vel_z = h * (a_z + b_z)/2;
+	  	document.getElementById("ult_velocidad").innerHTML = "x:" + vel_x + "<br />y:" + vel_y + "<br/>z:" + vel_z;
+
+	}
 
       function drawAccFromJson(json){
 	//update iphone position
@@ -179,6 +194,8 @@ body{
 	addToAccChart(0, json["acc_x"])
 	addToAccChart(1, json["acc_y"])
 	addToAccChart(2, json["acc_z"])
+
+
 	accChart.data.labels.push("a");
 
 	if(accChart.data.labels.length > 150){
@@ -196,7 +213,10 @@ body{
 	  ctx_acc.lineTo(pos.x, pos.y);
 	  ctx_acc.stroke();
 	  delta = Math.sqrt(Math.pow(last_pos_a.x-pos.x, 2) + Math.pow(last_pos_a.y-pos.y, 2))
+	  findVelocity(last_pos_json, json);
+
 	}
+      	last_pos_json = json;
 	last_pos_a = pos;
 	  ctx_acc.fillStyle = "red";
 	ctx_acc.fillRect(pos.x, pos.y, 2, 2);
