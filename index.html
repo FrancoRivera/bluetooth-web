@@ -75,15 +75,20 @@ body{
       </div>
       <div class="row">
 	<div class="col-6">
+	  <canvas id="velChart" width="200" height="100"> </canvas>
+	</div>
+	<div class="col-6">
+	  <canvas id="graphChart" width="200" height="100"> </canvas>
+	</div>
+      </div>
+      <div class="row">
+	<div class="col-6">
 	  <h1>Golpes:</h1>
 	  <div id="golpes" class="button"></div>
 	  <div id="ult_golpe" class="button"></div>
 	  <div id="current_pos"></div>
 	  <div id="current_refresh" class="button primary"></div>
 	  <div id="ult_velocidad" class="button primary"></div>
-	</div>
-	<div class="col-6">
-	  <canvas id="graphChart" width="200" height="100"> </canvas>
 	</div>
       </div>
 
@@ -180,6 +185,19 @@ body{
 		var vel_y = h * (a_y + b_y)/2;
 		var vel_z = h * (a_z + b_z)/2;
 	  	document.getElementById("ult_velocidad").innerHTML = "x:" + vel_x + "<br />y:" + vel_y + "<br/>z:" + vel_z;
+		addToVelChart(0, vel_x)
+		addToVelChart(1, vel_y)
+		addToVelChart(2, vel_z)
+
+
+		velChart.data.labels.push("a");
+
+		if(velChart.data.labels.length > 150){
+		  velChart.data.labels.shift();
+		  velChart.data.datasets[0].data.shift();
+		  velChart.data.datasets[1].data.shift();
+		  velChart.data.datasets[2].data.shift();
+		}
 
 	}
 
@@ -298,10 +316,53 @@ var accChart = new Chart(ctx_chart, {
 function addToAccChart(index, value){
   accChart.data.datasets[index].data.push(value);
 }
+function addToVelChart(index, value){
+  velChart.data.datasets[index].data.push(value);
+}
 window.setInterval(function(){
   accChart.update();
+  velChart.update();
   renderer.render(scene, camera);
-}, 1000/60)
+}, 100)
+    </script>
+    <script>
+      var ctx_vel = document.getElementById('velChart').getContext('2d');
+var velChart = new Chart(ctx_vel, {
+  type: 'line',
+  data: {
+    labels: ['Red', "Green"],
+    datasets: [
+      {
+	label: 'x',
+	data: [0],
+	backgroundColor: [ 'rgba(255, 99, 132, 0.2)', ],
+	borderColor: [ 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+	borderWidth: 1
+      },
+      {
+	label: 'y',
+	data: [0],
+	backgroundColor: [ 'rgba(0, 0, 255, 0.2)', ],
+	borderWidth: 1
+      },
+      {
+	label: 'z',
+	data: [0],
+	backgroundColor: [ 'rgba(0, 255, 0, 0.2)', ],
+	borderWidth: 1
+      }
+    ],
+  },
+  options: {
+    scales: {
+      yAxes: [{
+	ticks: {
+	  beginAtZero: true
+	}
+      }]
+    }
+  }
+});
     </script>
   </body>
 </html>

@@ -153,9 +153,16 @@ function getSupportedProperties(characteristic) {
 	a.push((value.getInt8(i).toString(16)).slice(-2));
       }
 
-      var json = JSON.parse(hex_to_ascii(a.join('')));
+      //console.log(hex_to_ascii(a.join('')))
 
-      arreglo_mediciones.push(json);
-      drawAccFromJson(json);
+      var json = JSON.parse(hex_to_ascii(a.join('')));
+      //console.log(json);
+      for (var i = 0; i < json.length; i++){
+	arreglo_mediciones.push(json[i]);
+	drawAccFromJson(json[i]);
+      }
+
+      //arreglo_mediciones.push(json);
+      //drawAccFromJson(json);
 
     }
